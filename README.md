@@ -5,49 +5,48 @@
 
 
 
-This chatbot supports phone marketing using the RAG (Retrieval Augmented Generation) architecture. The architecture creates a more powerful model by providing additional information from database retrieval to the model.
+This chatbot supports phone marketing, is a combination of the most advanced RAG technologies, including **Agentic RAG**, **Graph RAG**, and **Semantic RAG**, integrated in a way that ensures optimal query time and result delivery. The architecture creates a more powerful model by providing additional information from database retrieval to the model.
 
 
 
-## Model Architecture Image
+## System Architecture Image
 
-![image](Assets/Architecture.png)
+![image](Assets/flow.png)
 
-## I. Setting Up the Environment
+## I. Setting Up the Backend Environment
 #### Step 1: Create a Conda environment named your_env_name with Python 3.11.3
 
 ```python
 conda create -n ${your_env_name} python= 3.11.3
-```
-
-#### Step 2: Activate the newly created environment with the following command:
-```
 conda activate ${your_env_name}
 ```
 
-#### Step 3: Install the packages from the requirements.txt file
+#### Step 2: Install the packages from the requirements.txt file
 
 ```
+cd backend
 pip install -r requirements.txt
 ```
 
-#### Step 4: Create a .env file and add the following lines, replacing the placeholders with your actual values:
-```
-GROQ_API_KEY =
-MONGO_URI =
-LLM_MODEL =
-EMBEDDING_MODEL =
-DB_NAME =
-COLLECTION_NAME =
-```
+#### Step 3: Create a .env file and add the following lines, replacing the placeholders with your actual values:
+```env
+# API Keys
+OPENAI_API_KEY=your_openai_api_key_here
+GOOGLE_API_KEY=your_google_api_key_here
 
-- GROQ_API_KEY: Your key to access the [groq API](https://console.groq.com).
-- MONGO_URI: URI of your MongoDB Atlas instance.
-- EMBEDDING_MODEL: Name of the embedding model you're using for text embedding.
-- WEBSITE: Link store's website.
-- DB_NAME: Name of Database
-- COLLECTION_NAME: Name of collection
+# Database
+MONGODB_URI=mongodb://localhost:27017/chatbot_db
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USER=neo4j
+NEO4J_PASSWORD=your_password
 
+# Application
+FLASK_ENV=development
+FLASK_DEBUG=True
+API_HOST=0.0.0.0
+API_PORT=5000
+
+```
 ## II. Data
 
 For this project, we use data following the format below:
@@ -56,22 +55,27 @@ For this project, we use data following the format below:
 - The data set we use includes 320 phone models containing price information and detailed phone descriptions.
 - We are using MongoDB Atlas for Vector Search. You can learn how it works and how to do it [here](https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-overview/#atlas-vector-search-queries).
 
-## III. Features
+From the collected data above, we construct a graph consisting of entities represented by the nouns that appear, and the relationships between those entities. For example:
+![image](Assets/graph.png)
 
-- We added the feature to identify questions about whether it is necessary to extract information from the database. This is to save time generating answers and system resources, and at the same time prevent the pattern of rambling answers that are not on point.
+## III. Basis and method of evaluation RAG
+We use a combination of **Agentic RAG**, **GraphRAG**, and **Semantic RAG** technologies to retrieve additional information based on the user's query. This combination still ensures stable performance by using multi-threading for processing, combined with **Cypher query** to accelerate graph retrieval.
 
-- We combine the user's query and the information exported from the database according to the following syntax:
+We use the [RAGAS](https://docs.ragas.io/en/stable/) library and a test dataset following the template below to evaluate three properties of RAG, including **Faithfulness**, **Answer Relevance**, and **Context Relevance**.
 
 ```
-"Query: {prompt_query} "Hãy trả lời bằng Tiếng Việt dựa trên thông tin các sản phẩm cửa hàng có như sau (Nếu không có thông tin thì hãy đề xuất sản phẩm khác):" \n {search_result}."
+  {
+    "question": <User query>,
+    "ground_truth": <True response>,
+    "context": <RAG infomation>,
+    "answer": <LLM Respone after RAG>
+  },
 ```
 
-- Chatbot has the ability to save context during the conversation to help avoid answering the wrong topic. You can delete the chat history and create a new chat with the chatbot via the button `Làm mới cuộc trò chuyện`.
 
-- After being consulted, customers can also press the button `Đến Website bán hàng` to return to the store's website to continue purchasing.
 
 ## IV. Demo and Appplication
 
-This is demo of Phone Sale Assistant Chatbot:
+The interface of the application:
 
-![](Assets/VideoDemo.gif)
+![](Assets/view.png)

@@ -1,4 +1,3 @@
-# Replace with the actual URI, username and password
 import os
 import random
 import re
@@ -7,7 +6,6 @@ from threading import Thread
 
 import torch
 
-# Add the src directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
 import warnings
@@ -21,7 +19,7 @@ from service.LLM.llm import LLM
 from service.LLM.PROMPT import extract_entity_relationship_prompt
 from torch_geometric.data import Data
 
-from .gae import GAE  # Use relative import for local gae module
+from .gae import GAE 
 
 warnings.filterwarnings("ignore")
 
@@ -188,7 +186,6 @@ class Neo4jGraph:
         train_edge_index = edge_index[:, train_indices]
         val_edge_index = edge_index[:, val_indices]
 
-        # Step 2: Create Data objects for training and validation
         train_data = Data(x=features, edge_index=train_edge_index)
         val_data = Data(x=features, edge_index=val_edge_index)
 

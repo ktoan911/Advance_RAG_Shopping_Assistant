@@ -33,9 +33,9 @@ class Agent:
                     res.append(self.controller.execute_method_by_name(tool_name, args))
 
                 except Exception as e:
-                    logger.info(f"❌ Lỗi khi gọi tool '{tool_name}': {e}")
+                    logger.info(f"Lỗi khi gọi tool '{tool_name}': {e}")
                     return "Lỗi đường truyền mạng"
             return "\n".join(res)
         except Exception as e:
-            logger.info(f"❌ Lỗi trong agent loop: {e}")
+            logger.info(f"Lỗi trong agent : {e}")
             return "Error processing agent: " + str(e)

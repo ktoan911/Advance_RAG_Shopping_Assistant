@@ -5,7 +5,6 @@ import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
 
 
-# Define Graph Autoencoder for Nodes Only
 class GAE(torch.nn.Module):
     def __init__(self, input_dim, hidden_dim, embedding_dim):
         super(GAE, self).__init__()
