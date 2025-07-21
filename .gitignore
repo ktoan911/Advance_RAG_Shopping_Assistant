@@ -166,7 +166,6 @@ cython_debug/
 data/
 font/
 samples/
-tests/
 
 test.py
 test1.py

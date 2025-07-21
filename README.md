@@ -63,6 +63,7 @@ We use a combination of **Agentic RAG**, **GraphRAG**, and **Semantic RAG** tech
 
 We use the [RAGAS](https://docs.ragas.io/en/stable/) library and a test dataset following the template below to evaluate three properties of RAG, including **Faithfulness**, **Answer Relevance**, and **Context Relevance**.
 
+Example of test dataset:
 ```
   {
     "question": <User query>,
@@ -72,7 +73,14 @@ We use the [RAGAS](https://docs.ragas.io/en/stable/) library and a test dataset 
   },
 ```
 
-
+Result:
+```
+  {
+    "Faithfulness": 0.91,
+    "Answer Relevance": 0.88,
+    "Context Relevance": 0.4,
+  },
+```
 
 ## IV. Demo and Appplication
 
