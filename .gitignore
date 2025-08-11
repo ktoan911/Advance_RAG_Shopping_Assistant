@@ -163,7 +163,6 @@ cython_debug/
 .vscode
 
 # data
-data/
 font/
 samples/
 
