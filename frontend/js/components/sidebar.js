@@ -156,7 +156,6 @@ class SidebarComponent {
                 this.renderChatHistory();
             }
             
-            // TODO: Tải lịch sử từ API server
             const response = await chatAPI.getChatHistory();
             
             if (response.success && response.history.length > 0) {
@@ -310,8 +309,7 @@ class SidebarComponent {
             const chat = this.chatHistory.find(c => c.id === chatId);
             if (!chat) return;
             
-            // TODO: Tải chi tiết cuộc trò chuyện từ API
-            // Hiện tại sử dụng dữ liệu local
+
             this.currentChatId = chatId;
             this.updateActiveHistoryItem();
             
@@ -352,9 +350,6 @@ class SidebarComponent {
             if (!confirm(`Bạn có chắc muốn xóa cuộc trò chuyện "${chat.title}"?`)) {
                 return;
             }
-            
-            // TODO: Xóa từ API server
-            // await chatAPI.deleteChatSession(chatId);
             
             // Remove from local history
             this.chatHistory = this.chatHistory.filter(c => c.id !== chatId);

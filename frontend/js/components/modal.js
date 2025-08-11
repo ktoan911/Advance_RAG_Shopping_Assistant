@@ -163,7 +163,6 @@ class ModalComponent {
                 }
             }
             
-            // TODO: Gửi cấu hình mới đến API server
             if (newSettings.historyCount !== this.settings.historyCount) {
                 const response = await chatAPI.updateConfig({
                     numHistory: newSettings.historyCount

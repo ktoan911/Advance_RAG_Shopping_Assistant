@@ -7,10 +7,10 @@ import sys
 # Add the src directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-from common.logger import get_logger
+from src.common.logger import get_logger
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
-from service.sematic_router import (
+from src.service.sematic_router import (
     ChitchatProdcutsSentimentRoute,
     SemanticRouter,
 )
@@ -19,13 +19,13 @@ load_dotenv()
 logger = get_logger(__name__)
 
 # load the embedding model
-embedding_model = SentenceTransformer(os.environ["EMBEDDING_MODEL"])
+embedding_model = SentenceTransformer(os.environ.get("EMBEDDING_MODEL", r'keepitreal/vietnamese-sbert'))
 
 chitchat_prodcuts_sentiment_route = ChitchatProdcutsSentimentRoute()
 senmatic_router = SemanticRouter(embedding_model)
 
 embedding_routes = chitchat_prodcuts_sentiment_route.get_json_routesEmbedding(
-    path=r"Embedding\routesEmbedding.json",
+    path=r"Embedding/routesEmbedding.json",
 )
 
 
@@ -82,7 +82,7 @@ class TextProcessor:
             results.append(search_result)
         return results
 
-    # Hàm lấy embedding của câu truy vấn
+    # Function to get embedding of query sentence
     def get_embedding(self, text: str) -> list[float]:
         if not text.strip():
             logger.info("Attempted to get embedding for empty text.")

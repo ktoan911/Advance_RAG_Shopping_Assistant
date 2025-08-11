@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import os
 
-import service.LLM.PROMPT as p
-from common.logger import get_logger
-from common.text import TextProcessor
+import src.service.LLM.PROMPT as p
+from src.common.logger import get_logger
+from src.common.text import TextProcessor
 from dotenv import load_dotenv
-from service.LLM.llm import LLM
-from service.LLM.tool_infos import Tools
-from service.RAG import RAG
+from src.service.LLM.llm import LLM
+from src.service.LLM.tool_infos import Tools
+from src.service.RAG import RAG
 
 load_dotenv()
 

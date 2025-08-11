@@ -1,11 +1,11 @@
 import torch
 import torch.nn.functional as F
-from gae import GAE
+from src.service.graph.gae import GAE
 
 # from graph import Neo4jGraph
-from graph import Neo4jGraph
+from src.service.graph.graph import Neo4jGraph
 
-from common.logger import get_logger
+from src.common.logger import get_logger
 
 logger = get_logger("TRAINING GCN")
 

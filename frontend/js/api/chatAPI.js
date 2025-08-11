@@ -5,7 +5,6 @@
 
 class ChatAPI {
     constructor() {
-        // TODO: Thay đổi BASE_URL theo địa chỉ server backend của bạn
         this.BASE_URL = 'http://localhost:5000';
         this.timeout = 30000; // 30 seconds timeout
         this.retryAttempts = 3;
@@ -71,7 +70,6 @@ class ChatAPI {
      */
     async healthCheck() {
         try {
-            // TODO: Gọi API health check endpoint "/"
             const response = await this.makeRequest('/');
             return {
                 success: true,
@@ -99,7 +97,6 @@ class ChatAPI {
                 throw new Error('Message cannot be empty');
             }
 
-            // TODO: Gọi API endpoint "/get_message" với POST method
             // Payload: { input: message }
             const response = await this.makeRequest('/get_message', {
                 method: 'POST',
@@ -135,7 +132,6 @@ class ChatAPI {
      */
     async getChatHistory() {
         try {
-            // TODO: Gọi API endpoint "/get_history" với GET method
             const response = await this.makeRequest('/get_history');
 
             if (response.status === 'success') {
@@ -164,7 +160,6 @@ class ChatAPI {
      */
     async clearChatHistory() {
         try {
-            // TODO: Gọi API endpoint "/delete_history" với DELETE method
             const response = await this.makeRequest('/delete_history', {
                 method: 'DELETE'
             });
@@ -193,7 +188,7 @@ class ChatAPI {
      */
     async getConfig() {
         try {
-            // TODO: Gọi API endpoint "/config" với GET method
+
             const response = await this.makeRequest('/config');
 
             if (response.status === 'success') {
@@ -224,8 +219,6 @@ class ChatAPI {
      */
     async updateConfig(config) {
         try {
-            // TODO: Gọi API endpoint "/config" với POST method
-            // Payload: { num_history: config.numHistory }
             const response = await this.makeRequest('/config', {
                 method: 'POST',
                 body: JSON.stringify({
@@ -260,7 +253,6 @@ class ChatAPI {
      */
     async exportHistory() {
         try {
-            // TODO: Gọi API endpoint "/export_history" với GET method
             const response = await this.makeRequest('/export_history');
 
             if (response.status === 'success') {
@@ -391,15 +383,6 @@ class ChatAPI {
 
 // Create and export global instance
 window.chatAPI = new ChatAPI();
-
-// TODO: Khi triển khai production, hãy thay đổi các cấu hình sau:
-// 1. BASE_URL: Địa chỉ server backend thực tế
-// 2. Timeout: Điều chỉnh theo yêu cầu
-// 3. Retry attempts: Số lần thử lại khi request thất bại
-// 4. Error handling: Xử lý lỗi chi tiết hơn
-// 5. Authentication: Thêm xác thực nếu cần
-// 6. Rate limiting: Giới hạn số request
-// 7. Caching: Cache response để tối ưu performance
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {

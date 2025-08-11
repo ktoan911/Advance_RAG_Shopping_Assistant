@@ -14,7 +14,7 @@ from google.genai.types import (
 )
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from common.logger import get_logger
+from src.common.logger import get_logger
 
 load_dotenv()
 logger = get_logger(__name__)

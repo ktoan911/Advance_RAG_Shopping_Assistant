@@ -18,17 +18,8 @@ class Embedding:
         self.model = SentenceTransformer(embedding_model)
 
     def get_embedding(self, doc: list[str]):
-        """
-        Hàm này nhận vào một danh sách các chuỗi văn bản và trả về embeddings cho từng chuỗi.
 
-        Parameters:
-        doc (List[str]): Danh sách các chuỗi văn bản.
-
-        Returns:
-        List[List[float]]: Danh sách các embeddings, mỗi embedding là một danh sách các giá trị float.
-        """
-
-        # Kiểm tra nếu doc là rỗng hoặc không phải là danh sách
+        # Check if doc is empty or not a list
         if not doc or not isinstance(doc, list):
             print('Input is not a valid list of strings.')
             return []
@@ -100,7 +91,7 @@ class SemanticRouter():
 
 class ChitchatProdcutsSentimentRoute:
     def get_semanticRouter(self):
-        # @title Mẫu truy vấn
+        # @title Query samples
         productRoute = Route(
             name='products',
             samples=[
@@ -253,7 +244,7 @@ class ChitchatProdcutsSentimentRoute:
             ],
         )
 
-        # @title Mẫu truy vấn chitchat
+        # Chitchat query samples
         chitchatRoute = Route(
             name='chitchat',
             samples=[

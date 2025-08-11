@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import threading
 
-from controller.tool_controller import ToolController
+from src.controller.tool_controller import ToolController
 
 
 class ControllerService:

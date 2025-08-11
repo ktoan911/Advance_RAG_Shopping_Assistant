@@ -156,7 +156,7 @@ class ChatComponent {
         this.showTypingIndicator();
         
         try {
-            // TODO: Gọi API để gửi tin nhắn và nhận phản hồi
+
             const response = await chatAPI.sendMessage(validation.message);
             
             if (response.success) {
@@ -329,7 +329,6 @@ class ChatComponent {
      */
     async clearChat() {
         try {
-            // TODO: Gọi API để xóa lịch sử chat
             const response = await chatAPI.clearChatHistory();
             
             if (response.success) {
@@ -413,7 +412,7 @@ class ChatComponent {
      */
     async checkConnection() {
         try {
-            // TODO: Kiểm tra kết nối với API
+
             const status = await chatAPI.getConnectionStatus();
             
             if (status.connected) {
@@ -432,7 +431,6 @@ class ChatComponent {
      */
     async loadChatHistory() {
         try {
-            // TODO: Tải lịch sử chat từ API
             const response = await chatAPI.getChatHistory();
             
             if (response.success && response.history.length > 0) {
@@ -513,7 +511,6 @@ class ChatComponent {
      */
     async exportChat() {
         try {
-            // TODO: Xuất lịch sử chat qua API
             const response = await chatAPI.exportHistory();
             
             if (response.success) {

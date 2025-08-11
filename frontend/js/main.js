@@ -195,7 +195,6 @@ class ChatbotApp {
         try {
             console.log('🔗 Checking API connection...');
             
-            // TODO: Kiểm tra kết nối với API backend
             const isConnected = await chatAPI.isConnected();
             
             if (isConnected) {

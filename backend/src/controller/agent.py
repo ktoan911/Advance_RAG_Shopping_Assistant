@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from common.logger import get_logger
+from src.common.logger import get_logger
 from dotenv import load_dotenv
 from google.genai import types
-from infrastructure.controller_service import controller_service
-from service.LLM.llm import LLM
+from src.infrastructure.controller_service import controller_service
+from src.service.LLM.llm import LLM
 
 load_dotenv()
 

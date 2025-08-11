@@ -12,10 +12,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import pandas as pd
 import torch
 import torch.nn.functional as F
-from common.text import TextProcessor
+from src.common.text import TextProcessor
 from dotenv import load_dotenv
 from duckduckgo_search import DDGS
-from model.phone_db import PhoneDB
+from src.model.phone_db import PhoneDB
 from rapidfuzz import process
 
 load_dotenv()
@@ -30,16 +30,39 @@ class RAG:
         self.text_processor = TextProcessor()
         self.graph = Neo4jGraph()
 
-        self.edge_list = self.graph.get_edge()
-        self.source_nodes = [e[0] for e in self.edge_list]
-        self.node_mapping, _ = self.graph.get_node_mapping_id()
-        self.embeddings_graph_nodes = self.graph.get_all_graph_embeddings(
-            num_nodes=len(self.node_mapping), edge_list=self.edge_list
-        )
-        self.node_embeddings_norm = F.normalize(self.embeddings_graph_nodes, p=2, dim=1)
-        self.edge_lookup = {}
-        for src, tgt, rel in self.edge_list:
-            self.edge_lookup[(src, tgt)] = rel
+        try:
+            self.edge_list = self.graph.get_edge()
+            print(f"Loaded {len(self.edge_list)} edges from Neo4j")
+            
+            self.source_nodes = [e[0] for e in self.edge_list]
+            self.node_mapping, _ = self.graph.get_node_mapping_id()
+            print(f"Loaded {len(self.node_mapping)} nodes from Neo4j")
+            
+            if not self.node_mapping:
+                print("Warning: No nodes found in Neo4j database")
+                self.embeddings_graph_nodes = torch.randn(1, 8)  # Dummy embedding
+                self.node_embeddings_norm = F.normalize(self.embeddings_graph_nodes, p=2, dim=1)
+            else:
+                self.embeddings_graph_nodes = self.graph.get_all_graph_embeddings(
+                    num_nodes=len(self.node_mapping), edge_list=self.edge_list
+                )
+                self.node_embeddings_norm = F.normalize(self.embeddings_graph_nodes, p=2, dim=1)
+            
+            self.edge_lookup = {}
+            for src, tgt, rel in self.edge_list:
+                self.edge_lookup[(src, tgt)] = rel
+                
+            print("Graph embeddings loaded successfully")
+            
+        except Exception as e:
+            print(f"Error loading graph data: {e}")
+            print("Using dummy embeddings as fallback")
+            self.edge_list = []
+            self.source_nodes = []
+            self.node_mapping = {}
+            self.embeddings_graph_nodes = torch.randn(1, 8)
+            self.node_embeddings_norm = F.normalize(self.embeddings_graph_nodes, p=2, dim=1)
+            self.edge_lookup = {}
 
         self.ddgs = DDGS()
         self.all_phones = {i["title"]: i["url"] for i in self.db.get_all()}

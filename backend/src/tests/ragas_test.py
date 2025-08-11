@@ -152,7 +152,7 @@ def coverage_score(reference, candidate):
     return (covered_numbers + covered_upper) / total_important
 
 
-# Đọc dữ liệu từ file JSON
+# Read data from JSON file
 def load_json_as_evaluation_dataset(json_path):
     try:
         with open(json_path, "r", encoding="utf-8") as f:
@@ -161,7 +161,7 @@ def load_json_as_evaluation_dataset(json_path):
         print(f"Không tìm thấy file {json_path}")
         return None
 
-    # Tạo danh sách samples cho ragas
+    # Create samples list for ragas
     samples = []
     for item in data:
         sample = SingleTurnSample(
@@ -175,10 +175,10 @@ def load_json_as_evaluation_dataset(json_path):
     return EvaluationDataset(samples=samples)
 
 
-# Đường dẫn đến file test data
+# Path to test data file
 json_path = r"E:\Python\Chatbot-RAG\backend\test_ragas.json"
 
-# Tải dataset
+# Load dataset
 dataset = load_json_as_evaluation_dataset(json_path)
 
 if dataset is None:
@@ -187,7 +187,7 @@ if dataset is None:
 
 print("🚀 Bắt đầu đánh giá tổng hợp với Ragas...")
 
-# Đánh giá với Ragas metrics có sẵn
+# Evaluate with available Ragas metrics
 try:
     from ragas.metrics import (
         answer_relevancy,
@@ -211,7 +211,7 @@ try:
 
     print("✅ Ragas evaluation hoàn tất!")
 
-    # Chuyển thành DataFrame
+    # Convert to DataFrame
     df = results.to_pandas()
     print(f"📈 Processed {len(df)} samples")
 
@@ -219,7 +219,7 @@ except Exception as e:
     print(f"⚠️ Lỗi Ragas evaluation: {e}")
     df = None
 
-# Đánh giá custom metrics
+# Evaluate custom metrics
 print("\n🔧 Đang chạy custom metrics...")
 
 custom_scores = {
@@ -234,7 +234,7 @@ for i, sample in enumerate(dataset):
     reference = sample.reference
     candidate = sample.response
 
-    # Tính các scores
+    # Calculate scores
     bleu = simple_bleu_score(reference, candidate)
     rouge = simple_rouge_score(reference, candidate)
     semantic = semantic_similarity_score(reference, candidate)
@@ -247,7 +247,7 @@ for i, sample in enumerate(dataset):
     custom_scores["coverage_score"].append(coverage)
     custom_scores["exact_match_custom"].append(exact)
 
-# Tính trung bình
+# Calculate average
 avg_scores = {
     metric: sum(scores) / len(scores) for metric, scores in custom_scores.items()
 }
@@ -275,8 +275,7 @@ for metric, score in avg_scores.items():
     )
     print(f"   {emoji} {metric}: {score:.4f}")
 
-# Phân tích chi tiết top 3 samples
-print("\n🔍 --- Phân Tích Chi Tiết Top 3 Samples ---")
+print("\n🔍 --- Detailed Analysis of Top 3 Samples ---")
 print("=" * 50)
 
 for i in range(min(3, len(dataset))):
@@ -294,7 +293,6 @@ for i in range(min(3, len(dataset))):
     print(f"   Semantic: {custom_scores['semantic_similarity'][i]:.3f}")
     print(f"   Coverage: {custom_scores['coverage_score'][i]:.3f}")
 
-# Phân loại chất lượng
 print("\n📈 --- Phân Loại Chất Lượng Responses ---")
 print("=" * 50)
 

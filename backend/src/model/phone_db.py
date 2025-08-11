@@ -6,8 +6,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 import dotenv
 import pymongo
-from common.logger import get_logger
-from common.text import TextProcessor
+from src.common.logger import get_logger
+from src.common.text import TextProcessor
 
 # from common.text import get_embedding
 

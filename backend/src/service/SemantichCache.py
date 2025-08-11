@@ -17,7 +17,7 @@ def design_collections(db):
 def get_mongo_client(mongo_uri):
     """Establish connection to the MongoDB."""
     try:
-        # Kết nối tới MongoDB sử dụng URI
+        # Connect to MongoDB using URI
         client = pymongo.MongoClient(
             mongo_uri, appname='devrel.content.python',
         )
