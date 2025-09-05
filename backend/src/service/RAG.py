@@ -12,11 +12,12 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import pandas as pd
 import torch
 import torch.nn.functional as F
-from src.common.text import TextProcessor
 from dotenv import load_dotenv
 from duckduckgo_search import DDGS
-from src.model.phone_db import PhoneDB
 from rapidfuzz import process
+
+from src.common.text import TextProcessor
+from src.model.phone_db import PhoneDB
 
 load_dotenv()
 
@@ -33,27 +34,31 @@ class RAG:
         try:
             self.edge_list = self.graph.get_edge()
             print(f"Loaded {len(self.edge_list)} edges from Neo4j")
-            
+
             self.source_nodes = [e[0] for e in self.edge_list]
             self.node_mapping, _ = self.graph.get_node_mapping_id()
             print(f"Loaded {len(self.node_mapping)} nodes from Neo4j")
-            
+
             if not self.node_mapping:
                 print("Warning: No nodes found in Neo4j database")
                 self.embeddings_graph_nodes = torch.randn(1, 8)  # Dummy embedding
-                self.node_embeddings_norm = F.normalize(self.embeddings_graph_nodes, p=2, dim=1)
+                self.node_embeddings_norm = F.normalize(
+                    self.embeddings_graph_nodes, p=2, dim=1
+                )
             else:
                 self.embeddings_graph_nodes = self.graph.get_all_graph_embeddings(
                     num_nodes=len(self.node_mapping), edge_list=self.edge_list
                 )
-                self.node_embeddings_norm = F.normalize(self.embeddings_graph_nodes, p=2, dim=1)
-            
+                self.node_embeddings_norm = F.normalize(
+                    self.embeddings_graph_nodes, p=2, dim=1
+                )
+
             self.edge_lookup = {}
             for src, tgt, rel in self.edge_list:
                 self.edge_lookup[(src, tgt)] = rel
-                
+
             print("Graph embeddings loaded successfully")
-            
+
         except Exception as e:
             print(f"Error loading graph data: {e}")
             print("Using dummy embeddings as fallback")
@@ -61,7 +66,9 @@ class RAG:
             self.source_nodes = []
             self.node_mapping = {}
             self.embeddings_graph_nodes = torch.randn(1, 8)
-            self.node_embeddings_norm = F.normalize(self.embeddings_graph_nodes, p=2, dim=1)
+            self.node_embeddings_norm = F.normalize(
+                self.embeddings_graph_nodes, p=2, dim=1
+            )
             self.edge_lookup = {}
 
         self.ddgs = DDGS()
@@ -94,7 +101,9 @@ class RAG:
                 query_entities.extend(query_entity)
         matches = self._find_closest_entities(query_entities, self.node_mapping)
         if not matches or len(matches) == 0:
-            return "Thông tin bổ sung:\n" + ".\n".join(senmatic_search_result)
+            return "===Thông tin bổ sung cho câu hỏi===:\n" + ".\n".join(
+                senmatic_search_result
+            )
 
         matches = list(
             set(
@@ -135,7 +144,7 @@ class RAG:
         graph_search_result = [
             f"{src}: {', '.join(rels)}" for src, rels in grouped_result.items()
         ]
-        return "Thông tin bổ sung:\n" + ".\n".join(
+        return "=== Thông tin bổ sung cho câu hỏi ===:\n" + ".\n".join(
             sorted(list(set(graph_search_result)))
         )
 
@@ -170,7 +179,7 @@ class RAG:
                     f"Tiêu đề: {result['title']}. Nguồn:{result['href']}. Nội dung:{result['body']}"
                     for result in web_results
                 ]
-                return "Thông tin bổ sung:\n" + ".\n".join(
+                return "=== Thông tin bổ sung cho câu hỏi ===:\n" + ".\n".join(
                     sorted(list(set(web_results)))
                 )
             except Exception:
@@ -185,10 +194,10 @@ class RAG:
             for i, item in enumerate(data, start=1)
         ]
 
-        return "Thông tin cửa hàng:\n" + ".\n".join(sorted(list(set(loc))))
+        return "=== Thông tin cửa hàng ===:\n" + ".\n".join(sorted(list(set(loc))))
 
     def get_product_link(self, product_name: str):
         sim_product = process.extract(product_name, self.all_phones.keys(), limit=3)
-        return "Thông tin bổ sung: \n" + "\n".join(
+        return "=== Thông tin bổ sung cho câu hỏi ===: \n" + "\n".join(
             [f"{name} - {self.all_phones[name]}" for name, _, _ in sim_product]
         )

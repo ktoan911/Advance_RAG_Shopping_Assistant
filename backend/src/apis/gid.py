@@ -6,10 +6,11 @@ import time
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.common.logger import get_logger
-from src.controller.agent import Agent
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+
+from src.common.logger import get_logger
+from src.controller.agent import Agent
 from src.infrastructure.controller_service import controller_service
 
 app = Flask(__name__)
@@ -75,7 +76,7 @@ def chat():
 
             result = agent.execute(prompt)
             full_query = result.text if hasattr(result, "text") else str(result)
-            response_text = controller.get_llm_response(full_query)
+            response_text = controller.get_llm_response(prompt, full_query)
 
             return jsonify(
                 {
