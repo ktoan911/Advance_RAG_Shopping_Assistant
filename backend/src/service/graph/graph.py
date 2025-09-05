@@ -10,16 +10,17 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
 import warnings
 
-from src.common.logger import get_logger
-from src.common.text import TextProcessor
 from dotenv import load_dotenv
-from src.model.phone_db import PhoneDB
 from neo4j import GraphDatabase
-from src.service.LLM.llm import LLM
-from src.service.LLM.PROMPT import extract_entity_relationship_prompt
 from torch_geometric.data import Data
 
-from .gae import GAE 
+from src.common.logger import get_logger
+from src.common.text import TextProcessor
+from src.model.phone_db import PhoneDB
+from src.service.LLM.llm import Chatbot
+from src.service.LLM.PROMPT import extract_entity_relationship_prompt
+
+from .gae import GAE
 
 warnings.filterwarnings("ignore")
 
@@ -37,7 +38,7 @@ class Neo4jGraph:
             password = os.environ.get("AURA_PASSWORD", "12345678")
 
         self.driver = GraphDatabase.driver(uri, auth=(username, password))
-        self.llm = LLM(temperature=1, top_p=1)
+        self.llm = Chatbot(temperature=1, top_p=1)
         self.db = PhoneDB()
         self.text_processor = TextProcessor()
 
@@ -125,7 +126,9 @@ class Neo4jGraph:
                 logger.info(f"Executing query: {nodes_query}")
                 nodes = session.run(nodes_query)
                 node_mapping = {record["node_id"]: record["name"] for record in nodes}
-                reverse_node_mapping = {value: key for key, value in node_mapping.items()}
+                reverse_node_mapping = {
+                    value: key for key, value in node_mapping.items()
+                }
                 logger.info(f"Found {len(node_mapping)} nodes in Neo4j")
                 if len(node_mapping) > 0:
                     logger.info(f"Sample nodes: {list(node_mapping.items())[:3]}")
@@ -156,8 +159,10 @@ class Neo4jGraph:
                     logger.info(f"Sample edges: {edge_list[:3]}")
                 else:
                     logger.warning("No edges found! Checking database status...")
-                    # Quick diagnostic query  
-                    result = session.run("MATCH ()-[r]->() RETURN count(r) as total_edges")
+                    # Quick diagnostic query
+                    result = session.run(
+                        "MATCH ()-[r]->() RETURN count(r) as total_edges"
+                    )
                     total_edges = result.single()["total_edges"]
                     logger.warning(f"Total edges in database: {total_edges}")
             return edge_list
@@ -227,14 +232,16 @@ class Neo4jGraph:
         # Validate inputs
         if num_nodes <= 0:
             raise ValueError(f"num_nodes must be positive, got {num_nodes}")
-        
+
         if not edge_list:
             logger.warning("Edge list is empty, creating dummy embeddings")
             # Return dummy embeddings if no edges
             return torch.randn(num_nodes, 8)  # 8 is embedding_dim
-        
-        logger.info(f"Loading graph embeddings for {num_nodes} nodes and {len(edge_list)} edges")
-        
+
+        logger.info(
+            f"Loading graph embeddings for {num_nodes} nodes and {len(edge_list)} edges"
+        )
+
         model = GAE(
             input_dim=num_nodes,
             hidden_dim=16,
@@ -248,7 +255,7 @@ class Neo4jGraph:
             return torch.randn(num_nodes, 8)
 
         try:
-            model.load_state_dict(torch.load(model_path, map_location='cpu'))
+            model.load_state_dict(torch.load(model_path, map_location="cpu"))
             model.eval()
         except Exception as e:
             logger.error(f"Failed to load model from {model_path}: {e}")
@@ -261,20 +268,24 @@ class Neo4jGraph:
             edge_index = torch.tensor(edge_pairs, dtype=torch.long).t().contiguous()
         except Exception as e:
             logger.error(f"Failed to create edge_index tensor: {e}")
-            logger.error(f"Edge list sample: {edge_list[:5] if len(edge_list) >= 5 else edge_list}")
+            logger.error(
+                f"Edge list sample: {edge_list[:5] if len(edge_list) >= 5 else edge_list}"
+            )
             return torch.randn(num_nodes, 8)
-        
+
         # Validate edge_index dimensions
         if edge_index.shape[0] != 2:
             logger.error(f"Invalid edge_index shape: {edge_index.shape}")
             return torch.randn(num_nodes, 8)
-        
+
         node_features = torch.eye(num_nodes)  # One-hot encoding for each node
 
         try:
             with torch.no_grad():
                 embeddings, _ = model(node_features, edge_index)
-            logger.info(f"Successfully generated embeddings with shape: {embeddings.shape}")
+            logger.info(
+                f"Successfully generated embeddings with shape: {embeddings.shape}"
+            )
             return embeddings
         except Exception as e:
             logger.error(f"Failed during model inference: {e}")

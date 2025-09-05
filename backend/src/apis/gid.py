@@ -6,15 +6,15 @@ import time
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.common.logger import get_logger
-from src.controller.agent import Agent
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from src.infrastructure.controller_service import controller_service
+
+from src.common.logger import get_logger
+from src.controller.chat_controller import ChatController
 
 app = Flask(__name__)
 CORS(app)
-controller = None
+controller = ChatController()
 is_ready = False
 logger = get_logger("ChatbotRAGAPI")
 agent = None
@@ -27,15 +27,8 @@ def initialize_controller():
     start_time = time.time()
 
     try:
-        logger.info("📦 Đang khởi tạo agent")
-        agent = Agent()
-        logger.info("📚 Đang khởi tạo Message Controller...")
-        controller = controller_service.get_controller()
-
         logger.info("Đang warmup system với test query...")
-        _ = controller.get_general_message(
-            "Xin chào, bạn có thể giới thiệu về sản phẩm không?"
-        )
+        _ = controller.get("Xin chào, bạn có thể giới thiệu về sản phẩm không?")
         controller.delete_history()
 
         initialization_time = time.time() - start_time
@@ -73,10 +66,7 @@ def chat():
         try:
             start = time.time()
 
-            result = agent.execute(prompt)
-            full_query = result.text if hasattr(result, "text") else str(result)
-            response_text = controller.get_llm_response(full_query)
-
+            response_text = controller
             return jsonify(
                 {
                     "response": response_text,

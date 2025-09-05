@@ -4,41 +4,40 @@ import os
 import sys
 
 from dotenv import load_dotenv
-from google import genai
-from google.genai.types import (
-    FunctionCallingConfig,
-    FunctionCallingConfigMode,
-    GenerateContentConfig,
-    Tool,
-    ToolConfig,
-)
+from langchain.schema import HumanMessage, SystemMessage
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
 from src.common.logger import get_logger
 
 load_dotenv()
 logger = get_logger(__name__)
 
 
-class LLM:
+class Chatbot:
     def __init__(
         self,
         model: str = os.environ["LLM_MODEL"],
         temperature: float = 0.7,
-        top_p: float = 0.5,
-        top_k: int = 20,
-        instructions: str = None,
-        history: list[dict] = None,
+        instructions: str = "",
+        all_tools: list = None,
     ):
         self.keys = os.environ["API_KEY"].split(",")
         self.api_key_index = 0
 
-        self.client = genai.Client(api_key=self.keys[0])
+        self.client = ChatGoogleGenerativeAI(
+            model=model,
+            google_api_key=self.keys[0],
+            temperature=temperature,
+            convert_system_message_to_human=True,
+        )
         self.model = model
         self.temperature = temperature
-        self.top_p = top_p
-        self.top_k = top_k
         self.instructions = instructions
+        self.all_tools = all_tools
+        if self.all_tools is not None and len(self.all_tools) > 0:
+            self.client_agent = self.client.bind_tools(all_tools, tool_choice="any")
 
     def get_chat(self):
         return self.chat
@@ -46,42 +45,18 @@ class LLM:
     def get_message(
         self,
         prompt: str,
-        stream: bool = False,
     ) -> str | None:
         num_try = 3
         while num_try > 0:
             try:
-                if not stream:
-                    response = self.client.models.generate_content(
-                        model=self.model,
-                        contents=prompt,
-                        config=GenerateContentConfig(
-                            temperature=self.temperature,
-                            system_instruction=self.instructions,
-                            candidate_count=1,
-                            top_p=self.top_p,
-                            top_k=self.top_k,
-                            seed=42,
-                            max_output_tokens=2048,
-                        ),
-                    )
-                    return response.text
-                else:
-                    for chunk in self.client.models.generate_content_stream(
-                        model=self.model,
-                        contents=prompt,
-                        config=GenerateContentConfig(
-                            temperature=self.temperature,
-                            system_instruction=self.instructions,
-                            candidate_count=1,
-                            top_p=self.top_p,
-                            top_k=self.top_k,
-                            seed=42,
-                            max_output_tokens=2048,
-                        ),
-                    ):
-                        print(chunk.text)
-                    return
+                response = self.client.invoke(
+                    [
+                        SystemMessage(content=self.instructions),
+                        HumanMessage(content=prompt),
+                    ]
+                )
+                ai_response = response.content
+                return ai_response
             except Exception as e:
                 logger.info(
                     f"API key {self.keys[self.api_key_index]} with error {e} failed. Trying next key."
@@ -90,35 +65,24 @@ class LLM:
                 if self.api_key_index >= len(self.keys):
                     self.api_key_index = 0
                     num_try -= 1
-                self.client = genai.Client(api_key=self.keys[self.api_key_index])
+                self.client = ChatGoogleGenerativeAI(
+                    model=self.model,
+                    google_api_key=self.keys[0],
+                    temperature=self.temperature,
+                    convert_system_message_to_human=True,
+                )
 
         return "Internet error. Please check your connection."
 
-    def function_calling(
-        self,
-        prompt: str,
-        tools: list[Tool] | None = None,
-    ) -> str | None:
+    def get_llm(self):
+        return self.client
+
+    def function_calling(self, prompt: str) -> list | str:
         num_try = 3
         while num_try > 0:
             try:
-                response = self.client.models.generate_content(
-                    model=self.model,
-                    contents=prompt,
-                    config=GenerateContentConfig(
-                        temperature=self.temperature,
-                        max_output_tokens=2048,
-                        tools=[tools],
-                        tool_config=ToolConfig(
-                            function_calling_config=FunctionCallingConfig(
-                                mode=FunctionCallingConfigMode.ANY
-                            )
-                        ),
-                    ),
-                )
-
-                return response
-
+                ai_msg = self.client_agent.invoke(prompt)
+                return ai_msg.tool_calls
             except Exception as e:
                 logger.info(
                     f"API key {self.keys[self.api_key_index]} with error {e} failed. Trying next key."
@@ -127,6 +91,11 @@ class LLM:
                 if self.api_key_index >= len(self.keys):
                     self.api_key_index = 0
                     num_try -= 1
-                self.client = genai.Client(api_key=self.keys[self.api_key_index])
+                self.client_agent = ChatGoogleGenerativeAI(
+                    model=self.model,
+                    google_api_key=self.keys[0],
+                    temperature=self.temperature,
+                    convert_system_message_to_human=True,
+                ).bind_tools(self.all_tools, tool_choice="any")
 
         return "Internet error. Please check your connection."
