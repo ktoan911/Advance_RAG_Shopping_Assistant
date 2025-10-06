@@ -1,7 +1,3 @@
-"""
-JSON-based Chat Message History để lưu trữ lịch sử trò chuyện
-"""
-
 import json
 import time
 from typing import List
@@ -17,7 +13,7 @@ from langchain.schema.messages import (
 from src.model.chat_db import ChatDB
 
 
-class JSONChatMessageHistory(BaseChatMessageHistory):
+class ChatMessageHistory(BaseChatMessageHistory):
     def __init__(self, user_id: str, session_id: str = "default"):
         self.user_id = user_id
         self.session_id = session_id
@@ -32,9 +28,6 @@ class JSONChatMessageHistory(BaseChatMessageHistory):
             "timestamp": time.time(),
         }
 
-    def delete(self):
-        return None
-
     def exists(self):
         return False
 
@@ -45,7 +38,6 @@ class JSONChatMessageHistory(BaseChatMessageHistory):
         return None
 
     def _dict_to_message(self, message_dict: dict) -> BaseMessage:
-        """Chuyển đổi dictionary thành BaseMessage"""
         message_type = message_dict["type"]
         content = message_dict["content"]
 
@@ -69,11 +61,10 @@ class JSONChatMessageHistory(BaseChatMessageHistory):
 
     @property
     def messages(self) -> List[BaseMessage]:
-        """Lấy tất cả messages"""
         message_dicts = self._load_messages()
         return [self._dict_to_message(msg_dict) for msg_dict in message_dicts]
 
-    def clear(self) -> None:
+    def delete(self) -> None:
         self.chat_db.delete_user(self.user_id)
 
     def get_recent_messages(self, limit: int = 10) -> List[BaseMessage]:
@@ -85,7 +76,7 @@ class JSONChatMessageHistory(BaseChatMessageHistory):
             return "Chưa có cuộc trò chuyện nào."
 
         summary_parts = []
-        for message in messages[-10:]:  # Chỉ lấy 10 message gần nhất
+        for message in messages[-10:]: 
             if isinstance(message, HumanMessage):
                 summary_parts.append(f"Người dùng: {message.content[:100]}...")
             elif isinstance(message, AIMessage):

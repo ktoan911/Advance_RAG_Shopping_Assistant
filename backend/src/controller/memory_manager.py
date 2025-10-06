@@ -7,8 +7,8 @@ from typing import Any, Dict, List
 from langchain.memory import ConversationBufferMemory
 from langchain.schema.messages import BaseMessage
 
-from src.service.memory.json_chat_history import JSONChatMessageHistory
-from src.service.memory.json_entity_store import JSONEntityStore
+from backend.src.service.memory.chat_history import ChatMessageHistory
+from backend.src.service.memory.entity_store import EntityStore
 from src.service.memory.vector_memory import VectorStoreMemory
 
 
@@ -19,9 +19,9 @@ class MemoryManager:
         self._initialize_memories()
 
     def _initialize_memories(self) -> None:
-        self.entity_store = JSONEntityStore(self.user_id)
+        self.entity_store = EntityStore(self.user_id)
 
-        self.chat_history = JSONChatMessageHistory(self.user_id, self.session_id)
+        self.chat_history = ChatMessageHistory(self.user_id, self.session_id)
 
         self.conversation_memory = ConversationBufferMemory(
             chat_memory=self.chat_history,

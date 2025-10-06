@@ -119,7 +119,6 @@ def delete_history():
 
 @app.route("/config", methods=["GET"])
 def get_config():
-    """Get current configuration"""
     return jsonify({"num_history": controller.num_history, "status": "success"})
 
 

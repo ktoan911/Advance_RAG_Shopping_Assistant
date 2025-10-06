@@ -6,12 +6,11 @@ from pydantic import Field
 from src.model.chat_db import ChatDB
 
 
-class JSONEntityStore(BaseEntityStore):
+class EntityStore(BaseEntityStore):
     user_id: str = Field(default="")
     chat_db: Optional[ChatDB] = Field(default=None)
 
     def __init__(self, user_id: str):
-        # Initialize với user_id và data khác
         super().__init__(user_id=user_id)
         self.chat_db = ChatDB()
 
@@ -35,7 +34,7 @@ class JSONEntityStore(BaseEntityStore):
         if entity_key not in entities:
             entities[entity_key] = []
 
-        # Tránh lưu trùng lặp
+        # avoid duplicates
         if fact not in entities[entity_key]:
             entities[entity_key].append(fact)
 
